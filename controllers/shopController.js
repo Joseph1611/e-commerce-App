@@ -174,19 +174,32 @@ exports.postOrders = (req, res, next) => {
   };
   
   exports.getOrders = (req, res, next) => {
-    User.findByPk(req.session.user.id)
-    .then(user => {
-        return user.getOrders({include: ['products']})
-    })
-    // Order.findAll({ where : {userId: req.session.user.id}},{include: ['products']})
-      .then(orders => {
-        console.log(orders[0].products[0]);
-        res.render('orders', {
-          path: '/orders',
-          pageTitle: 'Your Orders',
-          orders: orders,
-          userLoggedIn:req.session.user
-        });
-      })
-      .catch(err => console.log(err));
+    if(req.session.user.isAdmin) {
+        Order.findAll({include: ['products']})
+        .then(orders => {
+            res.render('orders', {
+                path: '/orders',
+                pageTitle: 'Your Orders',
+                orders: orders,
+                userLoggedIn:req.session.user
+              });
+        })
+    } else {
+        User.findByPk(req.session.user.id)
+        .then(user => {
+            return user.getOrders({include: ['products']})
+        })
+        // Order.findAll({ where : {userId: req.session.user.id}},{include: ['products']})
+          .then(orders => {
+            // console.log(orders[0].products[0]);
+            res.render('orders', {
+              path: '/orders',
+              pageTitle: 'Your Orders',
+              orders: orders,
+              userLoggedIn:req.session.user
+            });
+          })
+          .catch(err => console.log(err));
+    }
+
   };
